@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
+    <style>
+        html{
+            font-family: "Open Sans";
+            font-style: normal;
+            font-variant: normal;
+            font-weight: 500;
+            color: #333;
+            background: #f5f5f5;
+        }
+    
+        .row{
+            clear: both;
+            overflow: hidden;
+        }
+        header {
+            background-color:aquamarine;
+        }
+        h1{
+            color: #333;
+        }
+        h2{
+            color: #999;
+            padding: 5px;
+            line-height: 1.5em;
+            margin: 0;
+        }
+        p{
+            text-align: center;
+        }
+        #table table{
+            width: 90%;
+            margin: auto;
+        }
+        #counter_table{
+            float: left;
+        }
+        #counter_table table{
+            width: 500px;
+            margin-right: 50px;
+            margin-top: 40px;
+            margin-left: 20px;
+        }
+        thead tr{
+            color: #999;
+        }
+        tbody tr{
+            height: 40px;
+
+        }
+        tbody td{
+            border-bottom: 1px solid #f5f5f5;
+        }
+        td .legend{
+            border-radius: 50%;
+            height: 20px;
+            width: 20px;
+            display: block;
+        }
+        th.value{
+            width: 30px;
+        }
+        th{
+            text-transform: uppercase;
+            font-size: 12px;
+            text-align: left;
+        }
+        .main{
+            width: 900px;
+            margin: auto;
+        }
+        .y.axis .tick line {
+            stroke-width: 1;
+            stroke: rgba(0, 0, 0, 0.2);
+        }
+        .y.axis path.domain{
+            stroke: none;
+        }
+        footer{
+            background-color: aquamarine;
+        }
+    </style>
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <title>D3 Project</title>
+</head>
+<body>
+<div class="main">
+    <header>
+            <h1>Dashboard</h1>
+    </header>
+    
+
+    <!-- We will add the donut and table here -->
+    <h2>Total answers</h2>
+    <div class="row">
+        <div id="counter_table"></div>
+        <div id="today"></div>
+    </div>
+
+    <!-- We will add barchart here -->
+    <h2>Rates</h2>
+    <div class="row">
+        <div id="month">
+        </div>
+    </div>
+
+    <!-- We will add the data table here -->
+    <h2>DATA</h2>
+    <div class="row">
+        <div id="table">
+        </div>
+    </div>
+
+</div>
+<footer>
+    <p>D3 PRoject Copyright &copy, 2018</p>
+</footer>
+
+
+
+   <script>
+var data = [
+{name: "Ana", rate: 9, comment:"Very intensive but challenging. I love it"},
+{name: "Mike", rate: 5, comment:"It is too hard for me and I struggle understand the lessons"},
+{name: "Jacob", rate: 10, comment:"I love the academy! I learn so many things!"},
+{name: "Sil", rate: 7, comment:"It is cool I expected more challenges"},
+{name: "Vanya", rate: 8, comment:"The lessons are very organized and it’s easy to keep up."},
+{name: "David", rate: 3, comment:"I couldn t understand anything from the first day. I would like more lessons than working by myself"},
+{name: "Karel", rate: 10, comment:"Best academy ever! So challenging and exciting"},
+{name: "Jiri", rate: 9, comment:"I love the teachers and the challenges."},
+{name: "Kate", rate: 9, comment:"I am satisfied with the level  intensity."},
+{name: "Jane", rate: 9, comment:"It is exactly what I expected a great academy"},
+];
+
+    data.forEach(function(d) {
+        d.rate = +d.rate;
+    });
+    var table = d3.select('#table').append('table');
+    var tbody = table.append('tbody');
+var tr = tbody.selectAll('tr')
+    .data(data).enter()
+    .append('tr')
+tr.append('td').html(function(d) { return d.name; });
+tr.append('td').html(function(d) { return d.rate });
+tr.append('td').html(function(d) { return d.comment });
+
+var thead = table.append('thead').append('tr')
+thead.append('th').text("name");
+thead.append('th').text("comment");
+thead.append('th').attr("class", "rate").text("rate");
+
+var month_margin = {top: 20, right: 20, bottom: 70, left: 40},
+    month_width = 900 - month_margin.left - month_margin.right,
+    month_height = 300 - month_margin.top - month_margin.bottom;
+
+var svg = d3.select("#month").append("svg")
+    .attr("width", month_width + month_margin.left + month_margin.right)
+    .attr("height", month_height + month_margin.top + month_margin.bottom)
+    .append("g")
+    .attr("transform",
+        "translate(" + month_margin.left + "," + month_margin.top + ")");
+
+var x = d3.scaleTime()
+  .range([0, month_width])
+  .domain([data[0].name, data[data.length-1].name]);
+
+var y = d3.scaleLinear()
+  .range([month_height, 0])
+  .domain([0, d3.max(data, function(d) { return d.rate; })]);
+  svg.selectAll("rect")
+        .data(data)
+        .enter().append("rect")
+        .style("fill", "#267E83")
+        .attr("x", function(d) { return x(d.name); })
+        .attr("width", 50)
+        .attr("y", function(d) { return y(d.rate); })
+        .attr("height", function(d) { return month_height - y(d.rate); });
+var yAxis = d3.axisLeft()
+    .scale(y)
+    .tickSize(-month_width) //as wide as our graph
+    .ticks(3);
+svg.append("g")
+    .attr("class", "y axis")
+    .call(yAxis)
+
+var xAxis = d3.axisBottom()
+     .scale(x)
+     .tickFormat(d3.timeFormat("%Y-%m"));
+
+
+ svg.append("g")
+     .attr("class", "x axis")
+     .attr("transform", "translate(0," + month_height + ")")
+     .call(xAxis)
+
+svg.selectAll("label")
+     .data(data)
+     .enter()
+     .append("text")
+     .attr("class", "label")
+     .style("fill", "#019875")
+     .attr("y", function(d) { return y(d.rate); })
+     .attr("x", function(d) { return x(d.name); })
+     .attr("dy", "-.35em") //vertical align middle
+     .attr("dx", ".7em") //vertical align middle
+     .text(function(d){ return d.rate; });
+
+
+
+
+
+
+</script>
+
+</body>
+</html>
