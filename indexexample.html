@@ -3,7 +3,7 @@
 
 <head>
     <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
-    
+    <link rel="stylesheet" href="style.css">
     <script src="https://d3js.org/d3.v4.min.js"></script>
     <title>D3 Project</title>
 </head>
@@ -57,70 +57,20 @@
             { name: "Jane", rate: 9, comment: "It is exactly what I expected a great academy" },
         ];
 // NEW DATA 
-        let newData = "";
-        let rate0 = 0;
-        let rate1 = 0;
-        let rate2 = 0;
-        let rate3 = 0;
-        let rate4 = 0;
-        let rate5 = 0;
-        let rate6 = 0;
-        let rate7 = 0;
-        let rate8 = 0;
-        let rate9 = 0;
-        let rate10 = 0;
-
-
-        for (let i = 0; i < data.length; i++) {
-
-            if (data[i].rate === 0) {
-                rate0++;
-            }
-            if (data[i].rate === 1) {
-                rate1++;
-            }
-            if (data[i].rate === 2) {
-                rate2++;
-            }
-            if (data[i].rate === 3) {
-                rate3++;
-            }
-            if (data[i].rate === 4) {
-                rate4++;
-            }
-            if (data[i].rate === 5) {
-                rate5++;
-            }
-            if (data[i].rate === 6) {
-                rate6++;
-            }
-            if (data[i].rate === 7) {
-                rate7++;
-            }
-            if (data[i].rate === 8) {
-                rate8++;
-            }
-            if (data[i].rate === 9) rate9++;
-            if (data[i].rate === 10) {
-                rate10++;
-            }
-        }
-
-        newData = [
-            { zero: rate0 },
-            { one: rate1 },
-            { two: rate2 },
-            { three: rate3 },
-            { four: rate4 },
-            { five: rate5 },
-            { six: rate6 },
-            { seven: rate7 },
-            { eight: rate8 },
-            { nine: rate9 },
-            { ten: rate10 }
-
-        ]
-
+ 
+       let dataCounts = [
+           {rate: 1, count:0},
+            {rate: 2, count:0},
+           {rate: 3, count:1},
+           {rate: 4, count:0},
+           {rate: 5, count:1},
+           {rate: 6, count:0},
+           {rate: 7, count:1},
+           {rate: 8, count:1},
+           {rate: 9, count:4},
+           {rate: 10, count:2},
+    ]
+// data.forEach(i => dataCounts[i.rate]++ );
 
 // THE END OF NEW DATA
 
@@ -162,11 +112,14 @@
             .attr("height", rates_height + rates_margin.top + rates_margin.bottom)
             .append("g")
             .attr("transform",
-                "translate(" + rates_margin.left + "," + rates_margin.top + ")");
+                "translate(" + rates_margin.left + "," + rates_margin.top + ")")
+                .style("float", "left");
 
-        var x = d3.scaleTime()
+
+        var x = d3.scaleLinear()
             .range([0, rates_width])
-            .domain([data[0].name, data[data.length - 1].name]);
+           // .domain(dataCounts.map(function(d){return d.rate}))
+           .domain([1,dataCounts.length+1])
 
         var y = d3.scaleLinear()
             .range([rates_height, 0])
@@ -174,26 +127,26 @@
 
 
         svg.selectAll("rect")
-            .data(data)
+            .data(dataCounts)
             .enter().append("rect")
             .style("fill", "#267E83")
-            .attr("x", function (d) { return x(d.name); })
+            .attr("x", function (d) { return x(d.rate); })
             .attr("width", 50)
-            .attr("y", function (d) { return y(d.rate); })
-            .attr("height", function (d) { return rates_height - y(d.rate); });
+            .attr("y", function (d) { return y(d.count); })
+            .attr("height", function (d) { return rates_height - y(d.count); }) 
 
 
         var yAxis = d3.axisLeft()
             .scale(y)
             .tickSize(-rates_width) //as wide as our graph
-            .ticks(3);
+            .ticks(10);
         svg.append("g")
             .attr("class", "y axis")
             .call(yAxis)
 
         var xAxis = d3.axisBottom()
             .scale(x)
-            .tickFormat(d3.timeFormat("%Y-%m"));
+            //.tickFormat(d3.timeFormat("%Y-%m"));
 
 
         svg.append("g")
@@ -202,16 +155,16 @@
             .call(xAxis)
 
         svg.selectAll("label")
-            .data(data)
+            .data(dataCounts)
             .enter()
             .append("text")
             .attr("class", "label")
             .style("fill", "#019875")
-            .attr("y", function (d) { return y(d.rate); })
-            .attr("x", function (d) { return x(d.name); })
+            .attr("y", function (d) { return y(d.count); })
+            .attr("x", function (d) { return x(d.rate); })
             .attr("dy", "-.35em") //vertical align middle
             .attr("dx", ".7em") //vertical align middle
-            .text(function (d) { return d.rate; });
+            .text(function (d) { return d.count; }); 
 
 
 
